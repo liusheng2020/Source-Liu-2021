@@ -1,0 +1,8 @@
+funct
+%tr·½·¨
+tic
+[x4,val,k]=trustmdis(Loc_Monte_carlo_zhixin(:,kk));
+t=toc;
+LocTRdisn_zhixin(:,kk)=x4;
+T_TR_zhixin(kk,kkk)=t;
+K_TR_zhixin(kk,kkk)=k;

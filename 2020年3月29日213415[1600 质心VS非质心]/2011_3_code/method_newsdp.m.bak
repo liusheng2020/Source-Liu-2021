@@ -1,0 +1,58 @@
+% load coordinates.mat
+% u=[]; ys=[]; d=[]; D=[];
+% Q=diag(diserr.^(-2));
+% G=(eye(anchors_n)-1/sum(1/diserr.^2)*ones(anchors_n,1)*ones(anchors_n,1)'*Q)'*Q*(eye(anchors_n)-1/sum(1/diserr.^2)*ones(anchors_n,1)*ones(anchors_n,1)'*Q);
+% cvx_begin sdp
+% % cvx_solver sedumi
+%     variable u(2,1);
+%     variable ys(1,1);
+%     variable d(anchors_n,1);
+%     variable D(anchors_n,anchors_n) semidefinite;
+%     minimize(trace(D*G)-2*Ri'*G*d+alfa*trace(D));
+%     subject to
+%     [1,d';d,D]>=0;
+%     [eye(2),u;u',ys]>=0;
+%     for m=1:anchors_n
+%             D(m,m)==ys-2*u'*all_nodes.all(:,m)+all_nodes.all(:,m)'*all_nodes.all(:,m);
+%             norm(u-all_nodes.all(:,m))<=Di(m,1);
+%         for mm=m+1:anchors_n
+%             D(m,mm)>=abs(ys-u'*(all_nodes.all(:,m)+all_nodes.all(:,mm))+all_nodes.all(:,m)'*all_nodes.all(:,mm));
+%         end
+%     end
+% cvx_end
+
+load coordinates.mat
+tic
+u=[]; 
+ys=[];
+% d=[];
+D=[];
+d=Di;
+Q=diag(diserr.^(-2));
+% ys=u'*u;
+% D=d*d';
+
+% G=(eye(anchors_n)-1/anchors_n*1/sum(1/diserr.^2)*ones(anchors_n,1)*ones(anchors_n,1)'*Q)'*Q*(eye(anchors_n)-1/anchors_n*1/sum(1/diserr.^2)*ones(anchors_n,1)*ones(anchors_n,1)'*Q);
+G=(eye(anchors_n)-1/sum(1/diserr.^2)*ones(anchors_n,1)*ones(anchors_n,1)'*Q)'*Q*(eye(anchors_n)-1/sum(1/diserr.^2)*ones(anchors_n,1)*ones(anchors_n,1)'*Q);
+cvx_begin 
+    cvx_solver sedumi
+    variable u(2,1);
+    variable ys(1,1);
+    variable d(anchors_n,1);
+    variable D(anchors_n,anchors_n) semidefinite;
+    minimize(trace(D*G)-2*Ri'*G*d+alfa*trace(D));
+    subject to
+    [1,d';d,D]>=0;
+    [eye(2),u;u',ys]>=0;
+    for m=1:anchors_n
+            D(m,m)==ys-2*u'*all_nodes.all(:,m)+all_nodes.all(:,m)'*all_nodes.all(:,m);
+            norm(u-all_nodes.all(:,m))<=d(m,1);
+        for mm=m+1:anchors_n
+            D(m,mm)>=abs(ys-u'*(all_nodes.all(:,m)+all_nodes.all(:,mm))+all_nodes.all(:,m)'*all_nodes.all(:,mm));
+        end
+    end
+cvx_end
+LocSDP_new(:,kk)=u;
+t=toc;
+T10(kk,1)=t;
+
